@@ -27,7 +27,8 @@ class KnowledgeBasePage {
   get searchSubmit() { return this.page.locator('[data-search-form] button[type="submit"]'); }
   get filterCategory() { return this.page.locator('select[data-filter-cat]'); }
   get filterTag() { return this.page.locator('select[data-filter-tag]'); }
-  get clearFilter() { return this.page.locator('[data-clear-filter]'); }
+  get clearFilter() { return this.page.locator('.toolbar [data-clear-filter]'); }
+  get clearFilterState() { return this.page.locator('.state-actions [data-clear-filter]'); }
 
   // 页面头部「新建文档」按钮（唯一）；空态/无结果状态下另有 state-view 内的引导按钮
   get newDocHeadButton() { return this.page.locator('.head-actions [data-new-doc]'); }
@@ -86,6 +87,12 @@ class KnowledgeBasePage {
   get lastToast() { return this.page.locator('#toast-box .toast').last(); }
 
   /* ---------------- 原型演示控制台（模拟异常/空态，非产品功能） ---------------- */
+  get devPanel() { return this.page.locator('#dev-panel'); }
+  get devToggle() { return this.page.locator('[data-dev-toggle]'); }
+  async expandDevPanel() {
+    const collapsed = await this.devPanel.evaluate((el) => el.classList.contains('collapsed'));
+    if (collapsed) await this.devToggle.click();
+  }
   get simLoadError() { return this.page.locator('[data-sim="loadError"]'); }
   get simSaveError() { return this.page.locator('[data-sim="saveError"]'); }
   get simEmptyData() { return this.page.locator('[data-sim="emptyData"]'); }

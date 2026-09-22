@@ -6,7 +6,7 @@
  * - 浏览器：优先仓库配置 -> 系统 Chrome（通过 helpers/browser.js 探测，
  *   可被环境变量 PLAYWRIGHT_CHROMIUM_PATH 覆盖）；不下载 Playwright 自带浏览器。
  * - 服务：webServer 使用本仓库内置 node server.js 静态服务原型目录。
- * - 报告：HTML 报告输出到 e2e/reports/playwright-report，截图/视频/trace
+ * - 报告：HTML 报告输出到 e2e/reports/playwright-report，截图/trace
  *   失败时保留到 e2e/reports/test-results。
  */
 const path = require('path');
@@ -34,7 +34,6 @@ module.exports = defineConfig({
     viewport: { width: 1440, height: 900 },
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
-    video: 'retain-on-failure',
     ...(chromePath ? { launchOptions: { executablePath: chromePath } } : {})
   },
   webServer: {

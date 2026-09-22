@@ -125,7 +125,7 @@ test.describe('知识库系统原型 E2E（REQ-001 ~ REQ-008）', () => {
       await expect(kb.lastToast).toContainText('文档已更新');
       await expect(kb.detailTitle).toHaveText('网关服务架构设计（修订）');
       await expect(kb.detailMeta.locator('.badge-cat')).toContainText('测试文档');
-      await expect(kb.detailMeta.locator('.tag')).toContainText('评审');
+      await expect(kb.detailMeta.locator('.tag').filter({ hasText: '评审' })).toHaveCount(1);
       await kb.backButton.click();
       await expect(kb.docCardByTitle('网关服务架构设计（修订）')).toBeVisible();
     });
@@ -136,6 +136,7 @@ test.describe('知识库系统原型 E2E（REQ-001 ~ REQ-008）', () => {
       await kb.blankTemplate.click();
       await kb.titleInput.fill('保存失败重试验证文档');
       await kb.contentInput.fill('## 正文\n用于验证保存失败重试场景。');
+      await kb.expandDevPanel();
       await kb.simSaveError.check();
       await kb.saveButton.click();
       await expect(kb.lastToast).toContainText('保存失败（演示模式）');
@@ -157,7 +158,7 @@ test.describe('知识库系统原型 E2E（REQ-001 ~ REQ-008）', () => {
       await kb.docCardByTitle('网关服务架构设计').click();
       await expect(kb.detailTitle).toHaveText('网关服务架构设计');
       await expect(kb.detailMeta.locator('.badge-cat')).toContainText('技术文档');
-      await expect(kb.detailMeta.locator('.tag')).toContainText('架构');
+      await expect(kb.detailMeta.locator('.tag').filter({ hasText: '架构' })).toHaveCount(1);
       await expect(kb.detailBody.locator('h1')).toContainText('网关服务架构设计');
       await expect(kb.detailBody).toContainText('统一请求入口与鉴权');
     });
@@ -247,8 +248,9 @@ test.describe('知识库系统原型 E2E（REQ-001 ~ REQ-008）', () => {
       await kb.search('不存在的关键词xyz');
       await expect(kb.stateTitle).toHaveText('暂无搜索结果');
       await expect(kb.clearFilter).toBeVisible();
+      await expect(kb.clearFilterState).toBeVisible();
       await expect(kb.newDocStateButton).toBeVisible();
-      await kb.clearFilter.click();
+      await kb.clearFilterState.click();
       await expect(kb.listSummary).toContainText('全部文档：9 篇');
       await expect(kb.docCards).toHaveCount(9);
     });
@@ -263,7 +265,7 @@ test.describe('知识库系统原型 E2E（REQ-001 ~ REQ-008）', () => {
       await kb.addTag('工程实践');
       await kb.saveButton.click();
       await expect(kb.lastToast).toContainText('文档已更新');
-      await expect(kb.detailMeta.locator('.tag')).toContainText('工程实践');
+      await expect(kb.detailMeta.locator('.tag').filter({ hasText: '工程实践' })).toHaveCount(1);
       await kb.backButton.click();
       await kb.search('工程实践');
       await expect(kb.docCardByTitle('团队代码规范（前端）')).toBeVisible();
@@ -293,6 +295,7 @@ test.describe('知识库系统原型 E2E（REQ-001 ~ REQ-008）', () => {
   test.describe('REQ-008 状态与反馈', () => {
     test('知识库无文档时展示空态与新建文档引导', async ({ page }) => {
       const kb = new KnowledgeBasePage(page);
+      await kb.expandDevPanel();
       await kb.simEmptyData.check();
       await expect(kb.stateTitle).toHaveText('暂无文档');
       await expect(kb.newDocStateButton).toBeVisible();
@@ -312,6 +315,7 @@ test.describe('知识库系统原型 E2E（REQ-001 ~ REQ-008）', () => {
 
     test('加载失败展示错误态与重试入口，关闭故障源后重试恢复', async ({ page }) => {
       const kb = new KnowledgeBasePage(page);
+      await kb.expandDevPanel();
       await kb.simLoadError.check();
       await expect(kb.stateTitle).toHaveText('加载失败');
       await expect(kb.retryButton).toBeVisible();
