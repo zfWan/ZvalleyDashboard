@@ -496,14 +496,18 @@
       state.filter.tag = e.target.value;
       renderHome(route);
     });
-    // data-clear-filter 仅在存在筛选条件时渲染，需防御性绑定
-    var clearFilterBtn = $('[data-clear-filter]', viewEl);
-    if (clearFilterBtn) clearFilterBtn.addEventListener('click', function () {
-      state.filter = { keyword: '', category: '', tag: '' };
-      state.searchInput = '';
-      renderHome(route);
+    // D3 修复：data-clear-filter 在工具栏与无结果空态(state-actions)各有一个，需批量绑定
+    $all('[data-clear-filter]', viewEl).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.filter = { keyword: '', category: '', tag: '' };
+        state.searchInput = '';
+        renderHome(route);
+      });
     });
-    $('[data-new-doc]', viewEl).addEventListener('click', openTemplatePicker);
+    // D4 修复：data-new-doc 在页头(head-actions)与空态(state-view)各有一个，需批量绑定
+    $all('[data-new-doc]', viewEl).forEach(function (btn) {
+      btn.addEventListener('click', openTemplatePicker);
+    });
     $('[data-manage-cat]', viewEl).addEventListener('click', function () { openCategoryModal(); });
 
     $all('.doc-card', viewEl).forEach(function (card) {
@@ -540,9 +544,19 @@
     });
   }
 
+  // 从演示控制台 DOM 同步模拟开关状态到 state（评审可直接勾选/取消复选框后点「重试」）
+  function syncSimFromDom() {
+    $all('[data-sim]', $('#dev-panel')).forEach(function (cb) {
+      state.sim[cb.dataset.sim] = cb.checked;
+    });
+  }
+
   function wireErrorRetry() {
     var btn = $('[data-retry]', viewEl);
-    if (btn) btn.addEventListener('click', function () { renderHome(parseHash()); });
+    if (btn) btn.addEventListener('click', function () {
+      syncSimFromDom();
+      renderHome(parseHash());
+    });
   }
 
   /* ============================ 视图：详情（PAGE-002） ============================ */
@@ -614,12 +628,12 @@
       errors: {}
     };
 
-    var catOptions = store.categories.map(function (c) {
-      return '<option value="' + escapeHtml(c) + '"' + (state.editor.category === c ? ' selected' : '') + '>' + escapeHtml(c) + '</option>';
-    }).join('');
-
     function renderForm() {
       var e = state.editor;
+      // 每次重渲染按最新 state.editor.category 重新生成分类选项（D1：避免闭包旧值导致分类被还原）
+      var catOptions = store.categories.map(function (c) {
+        return '<option value="' + escapeHtml(c) + '"' + (state.editor.category === c ? ' selected' : '') + '>' + escapeHtml(c) + '</option>';
+      }).join('');
       var tagsHtml = e.tags.map(function (t, idx) {
         return '<span class="tag tag-input"><span>' + escapeHtml(t) + '</span><button type="button" class="tag-remove" data-remove-tag="' + idx + '" aria-label="移除标签">×</button></span>';
       }).join('');
@@ -670,6 +684,10 @@
       var tagInput = $('#f-tags', viewEl);
       var contentInput = $('#f-content', viewEl);
       var preview = $('.editor-preview', viewEl);
+
+      // D1 修复：输入实时回写 state.editor，避免标签增删触发 renderForm 时已输入内容被旧 state 还原
+      titleInput.addEventListener('input', function () { state.editor.title = titleInput.value; });
+      catSelect.addEventListener('change', function () { state.editor.category = catSelect.value; });
 
       $('[data-cancel]', viewEl).addEventListener('click', function () {
         if (hasDraftChanges()) {
@@ -728,6 +746,7 @@
         });
       });
       contentInput.addEventListener('input', function () {
+        state.editor.content = contentInput.value;
         if (!preview.hidden) preview.innerHTML = renderMarkdown(contentInput.value);
       });
 
@@ -813,7 +832,9 @@
       function () {
         store.docs = store.docs.filter(function (d) { return d.id !== docId; });
         toast('文档已删除');
-        location.hash = afterHash || '#/';
+        // D2 修复：hash 变化时由 hashchange 渲染；hash 未变化（列表页直接删除）时显式重渲染当前视图
+        if (afterHash && location.hash !== afterHash) location.hash = afterHash;
+        route();
       });
   }
 
