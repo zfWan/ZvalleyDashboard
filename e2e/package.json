@@ -1,0 +1,14 @@
+{
+  "name": "zvalleydashboard-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ZValleyDashboard 知识库系统可交互高保真原型的 E2E / UI 自动化测试（Playwright）",
+  "scripts": {
+    "test": "playwright test",
+    "test:kb": "playwright test specs/knowledge-base.spec.js",
+    "report": "playwright show-report reports/playwright-report"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.1"
+  }
+}
