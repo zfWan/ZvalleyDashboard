@@ -1,0 +1,94 @@
+{
+  "name": "zvalley-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Zvalley Dashboard - Vue 3 + Pinia + TypeScript + Vite frontend scaffolding",
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build --mode production",
+    "build:staging": "vue-tsc --noEmit && vite build --mode staging",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.ts,.js,.cjs,.mjs && stylelint \"src/**/*.{scss,css,vue}\"",
+    "lint:fix": "eslint . --ext .vue,.ts,.js,.cjs,.mjs --fix && stylelint \"src/**/*.{scss,css,vue}\" --fix",
+    "format": "prettier --write \"src/**/*.{ts,vue,js,json,scss,css,md}\" \"*.{json,cjs,js,md}\"",
+    "type-check": "vue-tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "commit": "git-cz",
+    "prepare": "husky"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-git"
+    }
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "@vueuse/core": "^11.2.0",
+    "axios": "^1.7.7",
+    "element-plus": "^2.8.8",
+    "nprogress": "^0.2.0",
+    "pinia": "^2.2.6",
+    "pinia-plugin-persistedstate": "^3.2.3",
+    "vue": "^3.5.12",
+    "vue-i18n": "^9.14.2",
+    "vue-router": "^4.4.5"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@eslint/js": "^9.14.0",
+    "@types/node": "^22.9.0",
+    "@types/nprogress": "^0.2.3",
+    "@unocss/preset-attributify": "^0.64.0",
+    "@unocss/preset-uno": "^0.64.0",
+    "@unocss/transformer-directives": "^0.64.0",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "@vitest/coverage-v8": "^2.1.4",
+    "@vue/test-utils": "^2.4.6",
+    "commitizen": "^4.3.1",
+    "cz-git": "^1.10.1",
+    "eslint": "^9.14.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-vue": "^10.11.1",
+    "globals": "^17.13.0",
+    "happy-dom": "^15.11.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "postcss-html": "^2.0.0",
+    "prettier": "^3.3.3",
+    "sass": "^1.80.6",
+    "stylelint": "^17.16.0",
+    "stylelint-config-recommended-vue": "^2.0.0",
+    "stylelint-config-standard-scss": "^14.0.0",
+    "typescript": "~5.6.3",
+    "typescript-eslint": "^8.13.0",
+    "unocss": "^0.64.0",
+    "unplugin-auto-import": "^0.18.3",
+    "unplugin-vue-components": "^0.27.4",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.4",
+    "vue-eslint-parser": "^10.4.1",
+    "vue-tsc": "^2.1.10"
+  },
+  "lint-staged": {
+    "*.{ts,vue,js,cjs,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{scss,css,vue}": [
+      "stylelint --fix"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
+}
