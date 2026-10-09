@@ -100,6 +100,6 @@ describe('router guards', () => {
     const r = makeRouter()
     await r.push('/public')
     // afterEach fires synchronously after navigation resolves
-    expect(document.title).toContain('zvalley-dashboard')
+    expect(document.title).toMatch(/Zvalley Dashboard/i)
   })
 })

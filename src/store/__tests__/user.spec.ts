@@ -8,7 +8,6 @@ describe('useUserStore', () => {
   beforeEach(() => {
     localStorage.clear()
     setActivePinia(createPinia())
-    // Avoid test leakage through the dynamic router import in logout().
     vi.resetModules()
   })
 
@@ -49,8 +48,9 @@ describe('useUserStore', () => {
     vi.useFakeTimers()
     const store = useUserStore()
     const promise = store.login({ username: '', password: '123456' })
+    const expectReject = expect(promise).rejects.toThrow('用户名或密码错误')
     await vi.advanceTimersByTimeAsync(600)
-    await expect(promise).rejects.toThrow('用户名或密码错误')
+    await expectReject
     expect(store.token).toBe('')
     vi.useRealTimers()
   })
@@ -59,8 +59,9 @@ describe('useUserStore', () => {
     vi.useFakeTimers()
     const store = useUserStore()
     const promise = store.login({ username: 'admin', password: '123' })
+    const expectReject = expect(promise).rejects.toThrow('用户名或密码错误')
     await vi.advanceTimersByTimeAsync(600)
-    await expect(promise).rejects.toThrow('用户名或密码错误')
+    await expectReject
     vi.useRealTimers()
   })
 
@@ -70,14 +71,10 @@ describe('useUserStore', () => {
     const promise = store.login({ username: 'admin', password: '123456' })
     await vi.advanceTimersByTimeAsync(600)
     await promise
-    // Simulate persistence having written the key manually (pinia-plugin-persistedstate
-    // persists after mutation; we emulate it here since we do not install the plugin
-    // with the pinia used in this unit test).
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({ token: store.token, userInfo: store.userInfo }),
     )
-
     store.logout(false)
     expect(store.token).toBe('')
     expect(store.userInfo).toBeNull()

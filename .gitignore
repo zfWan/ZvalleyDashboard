@@ -38,3 +38,4 @@ coverage
 # Auto generated lock files for other package managers
 package-lock.json
 yarn.lock
+e2e-report/

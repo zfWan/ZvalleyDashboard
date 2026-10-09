@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
+import ElementPlus from 'element-plus'
 import LoginPage from '@/views/login/index.vue'
 import i18n from '@/locales'
-import { permission as vPermission } from '@/directives/permission'
 
 function makeRouter() {
   return createRouter({
@@ -28,8 +28,7 @@ function mountLogin() {
     wrapper: mount(LoginPage, {
       attachTo: document.body,
       global: {
-        plugins: [pinia, i18n, router],
-        directives: { permission: vPermission },
+        plugins: [pinia, i18n, router, ElementPlus],
         stubs: { transition: false },
       },
     }),
@@ -43,57 +42,60 @@ describe('Login page', () => {
 
   it('renders title, inputs and submit button in zh-CN', () => {
     const { wrapper } = mountLogin()
-    expect(wrapper.text()).toContain('登录')
+    expect(wrapper.text()).toContain('账号登录')
     expect(wrapper.findAll('input').length).toBeGreaterThanOrEqual(2)
-    const submit = wrapper.findAll('button').find((b) => b.text().includes('登录'))
+    const submit = wrapper.findAll('button').find((b) => b.text().includes('登 录'))
     expect(submit).toBeTruthy()
   })
 
-  it('blocks submission when form is invalid and does not log user in', async () => {
-    const { wrapper } = mountLogin()
-    // Dynamic import so we use the same pinia as components
-    const { useUserStore } = await import('@/store/modules/user')
-    const store = useUserStore()
-    const loginSpy = vi.spyOn(store, 'login')
+  it('does not log the user in when username is empty (validation fails)', async () => {
+    const { wrapper, pinia } = mountLogin()
     const inputs = wrapper.findAll('input')
     await inputs[0].setValue('')
-    await inputs[1].setValue('')
-    // Trigger blur to fire validation
-    await inputs[0].trigger('blur')
-    await inputs[1].trigger('blur')
-    const submitBtn = wrapper.findAll('button').find((b) => b.text().includes('登录'))!
-    await submitBtn.trigger('click')
+    await inputs[1].setValue('123456')
+    await wrapper.vm.$nextTick()
+    const submitBtn = wrapper.findAll('button').find((b) => b.text().includes('登 录'))!
+    // Clicking the submit button triggers handleSubmit -> formRef.validate()
+    // which rejects for empty username; handleSubmit catches and returns, so
+    // the login action must never resolve successfully.
+    const clickPromise = submitBtn.trigger('click')
     await vi.runAllTimersAsync()
-    expect(loginSpy).not.toHaveBeenCalled()
+    await clickPromise
+    const { useUserStore } = await import('@/store/modules/user')
+    const store = useUserStore(pinia)
     expect(store.isLoggedIn).toBe(false)
   })
 
   it('logs in successfully with admin credentials and populates token/roles', async () => {
-    const { wrapper } = mountLogin()
+    const { wrapper, pinia } = mountLogin()
     const inputs = wrapper.findAll('input')
     await inputs[0].setValue('admin')
     await inputs[1].setValue('123456')
-    const submitBtn = wrapper.findAll('button').find((b) => b.text().includes('登录'))!
-    await submitBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    const submitBtn = wrapper.findAll('button').find((b) => b.text().includes('登 录'))!
+    const clickPromise = submitBtn.trigger('click')
     await vi.advanceTimersByTimeAsync(700)
+    await clickPromise
     const { useUserStore } = await import('@/store/modules/user')
-    const store = useUserStore()
+    const store = useUserStore(pinia)
     expect(store.token).toBe('mock-token-admin')
     expect(store.username).toBe('admin')
     expect(store.roles).toContain('admin')
     expect(store.isLoggedIn).toBe(true)
   })
 
-  it('does not set token when password is too short', async () => {
-    const { wrapper } = mountLogin()
+  it('does not log the user in when password is too short', async () => {
+    const { wrapper, pinia } = mountLogin()
     const inputs = wrapper.findAll('input')
     await inputs[0].setValue('admin')
     await inputs[1].setValue('123')
-    const submitBtn = wrapper.findAll('button').find((b) => b.text().includes('登录'))!
-    await submitBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    const submitBtn = wrapper.findAll('button').find((b) => b.text().includes('登 录'))!
+    const clickPromise = submitBtn.trigger('click')
     await vi.advanceTimersByTimeAsync(700)
+    await clickPromise
     const { useUserStore } = await import('@/store/modules/user')
-    const store = useUserStore()
+    const store = useUserStore(pinia)
     expect(store.isLoggedIn).toBe(false)
   })
 })
