@@ -1,9 +1,5 @@
 /**
- * Tests for BlankLayout (REQ-002.1 / REQ-007.1 / REQ-007.4).
- *
- * The blank layout hosts login and error pages; visitors who are not yet
- * signed in must be able to switch themes (TR-13) — ThemeToggle must be
- * mounted in the top-right tools area regardless of auth state.
+ * Tests for BlankLayout (REQ-002.1 / REQ-007.1 / REQ-007.4 / TR-13).
  */
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
@@ -14,18 +10,20 @@ import ThemeToggle from '@/components/ThemeToggle.vue'
 import i18n from '@/locales'
 
 describe('BlankLayout theme integration (REQ-002.1 / REQ-007)', () => {
+  let pinia: ReturnType<typeof createPinia>
   beforeEach(() => {
     localStorage.clear()
     document.documentElement.removeAttribute('data-theme')
     document.documentElement.classList.remove('dark')
-    setActivePinia(createPinia())
+    pinia = createPinia()
+    setActivePinia(pinia)
   })
 
   it('mounts ThemeToggle in the tools area for unauthenticated visitors (TR-13)', () => {
     const wrapper = mount(BlankLayout, {
       attachTo: document.body,
       global: {
-        plugins: [createPinia(), i18n, ElementPlus],
+        plugins: [pinia, i18n, ElementPlus],
         stubs: { transition: false, 'router-view': true },
       },
     })
@@ -33,18 +31,15 @@ describe('BlankLayout theme integration (REQ-002.1 / REQ-007)', () => {
     expect(wrapper.findComponent(ThemeToggle).exists()).toBe(true)
   })
 
-  it('uses the theme-aware page background token (var(--el-bg-color-page))', () => {
+  it('renders the top-right tools chip on blank pages', () => {
     const wrapper = mount(BlankLayout, {
       attachTo: document.body,
       global: {
-        plugins: [createPinia(), i18n, ElementPlus],
+        plugins: [pinia, i18n, ElementPlus],
         stubs: { transition: false, 'router-view': true },
       },
     })
-    const root = wrapper.find('.blank-layout').element as HTMLElement
-    // The container must reference the EP page bg token so dark theme can override it
-    expect(root.style.backgroundColor || getComputedStyle(root).backgroundColor).toBeDefined()
-    // The tools chip should be rendered even on error/login pages
+    expect(wrapper.find('.blank-layout').exists()).toBe(true)
     expect(wrapper.find('.blank-layout__tools').isVisible()).toBe(true)
   })
 })

@@ -148,8 +148,8 @@ describe('theme utils', () => {
 
   // --- watchSystemTheme ---
   describe('watchSystemTheme (REQ-001.3)', () => {
-    it('invokes handler with dark/light when prefers-color-scheme changes', () => {
-      const listeners = new Set<(ev: { matches: boolean }) => void>()
+    it('invokes handler with dark/light when prefers-color-scheme changes (REQ-001.3)', () => {
+      const listeners = new Set<() => void>()
       const mql = {
         matches: false,
         addEventListener: vi.fn((_ev: string, cb: any) => listeners.add(cb)),
@@ -161,12 +161,16 @@ describe('theme utils', () => {
       const unsub = watchSystemTheme(handler)
 
       expect(mql.addEventListener).toHaveBeenCalledWith('change', expect.any(Function))
-      // Simulate OS switching to dark
-      listeners.forEach((cb) => cb({ matches: true } as MediaQueryListEvent))
-      expect(handler).toHaveBeenLastCalledWith('dark')
-      // Simulate OS switching back to light
-      listeners.forEach((cb) => cb({ matches: false } as MediaQueryListEvent))
-      expect(handler).toHaveBeenLastCalledWith('light')
+
+      // Simulate OS switching to dark: onChange reads mql.matches, so update it.
+      mql.matches = true
+      listeners.forEach((cb) => cb())
+      expect(handler).toHaveBeenCalledWith('dark')
+
+      // Simulate OS switching back to light.
+      mql.matches = false
+      listeners.forEach((cb) => cb())
+      expect(handler).toHaveBeenCalledWith('light')
 
       unsub()
       expect(mql.removeEventListener).toHaveBeenCalledWith('change', expect.any(Function))

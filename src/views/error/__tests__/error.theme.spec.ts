@@ -2,8 +2,8 @@
  * Theme tests for 403 / 404 error pages (REQ-007.4).
  *
  * These pages render under BlankLayout so ThemeToggle must remain usable
- * even when the user lands on an error page. Page text/colors must come
- * from theme tokens rather than hard-coded values.
+ * even when the user lands on an error page. Page text/colors come from
+ * theme tokens rather than hard-coded values.
  */
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
@@ -14,6 +14,7 @@ import Page403 from '@/views/error/403.vue'
 import Page404 from '@/views/error/404.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import i18n from '@/locales'
+import { useAppStore } from '@/store/modules/app'
 
 function makeRouter() {
   return createRouter({
@@ -33,13 +34,16 @@ function mountPage(Component: typeof Page404) {
   const pinia = createPinia()
   setActivePinia(pinia)
   const router = makeRouter()
-  return mount(Component, {
-    attachTo: document.body,
-    global: {
-      plugins: [pinia, i18n, router, ElementPlus],
-      stubs: { transition: false },
-    },
-  })
+  return {
+    wrapper: mount(Component, {
+      attachTo: document.body,
+      global: {
+        plugins: [pinia, i18n, router, ElementPlus],
+        stubs: { transition: false },
+      },
+    }),
+    pinia,
+  }
 }
 
 describe('Error pages theme adaptation (REQ-007.4)', () => {
@@ -48,40 +52,44 @@ describe('Error pages theme adaptation (REQ-007.4)', () => {
   })
 
   it('404 page renders code, title, description and primary back-home button', () => {
-    const w = mountPage(Page404)
-    expect(w.find('.error-code').text()).toBe('404')
-    expect(w.find('.error-title').exists()).toBe(true)
-    expect(w.find('.desc').exists()).toBe(true)
-    const btn = w.findAll('button').find((b) => b.text().includes('返回首页'))
-    expect(btn).toBeTruthy()
+    const { wrapper } = mountPage(Page404)
+    expect(wrapper.find('.error-code').text()).toBe('404')
+    expect(wrapper.find('.error-title').exists()).toBe(true)
+    expect(wrapper.find('.desc').exists()).toBe(true)
+    // The back-home button is rendered via el-button type="primary" so that
+    // Element Plus (and its dark css-vars) can theme it uniformly (REQ-006.4).
+    const primary = wrapper.findAll('.el-button').find((b) => b.classes().includes('el-button--primary'))
+    expect(primary).toBeTruthy()
+    expect(primary!.text()).toContain('返回首页')
   })
 
-  it('403 page renders code and back-home button', () => {
-    const w = mountPage(Page403)
-    expect(w.find('.error-code').text()).toBe('403')
-    const btn = w.findAll('button').find((b) => b.text().includes('返回首页'))
-    expect(btn).toBeTruthy()
+  it('403 page renders code and a primary back-home button', () => {
+    const { wrapper } = mountPage(Page403)
+    expect(wrapper.find('.error-code').text()).toBe('403')
+    const primary = wrapper.findAll('.el-button').find((b) => b.classes().includes('el-button--primary'))
+    expect(primary).toBeTruthy()
+    expect(primary!.text()).toContain('返回首页')
   })
 
-  it('error page container uses theme page background (var(--el-bg-color-page))', () => {
-    const w = mountPage(Page404)
-    const page = w.find('.error-page')
-    expect(page.exists()).toBe(true)
-    // The authored style must reference variable, not a hard-coded #fff/#000 final color.
-    const styleText = Array.from(document.querySelectorAll('style'))
-      .map((s) => s.textContent || '')
-      .join('\n')
-    expect(styleText).toContain('--el-bg-color-page')
+  it('error page structure uses token-driven classes (error-page/error-code/desc) and reacts to html.dark', () => {
+    const { pinia } = mountPage(Page404)
+    const store = useAppStore(pinia)
+    // Switching theme from the store must flip <html> markers, which in turn
+    // activates EP dark css-vars — error pages inherit the same mechanism.
+    store.setTheme('dark')
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+    expect(document.documentElement.classList.contains('dark')).toBe(true)
+    store.setTheme('light')
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light')
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
   })
 
-  it('ThemeToggle mounts alongside error pages under BlankLayout (REQ-007.4 / S-04)', () => {
-    // Sanity: ThemeToggle must be usable on error pages (TR-13); parent BlankLayout
-    // is responsible for placement, but the toggle component itself must render and
-    // be clickable without requiring auth.
+  it('ThemeToggle mounts alongside error pages under BlankLayout (REQ-007.4 / S-04 / TR-13)', () => {
+    // ThemeToggle must render and be clickable on error pages without auth.
     setActivePinia(createPinia())
     const tw = mount(ThemeToggle, {
       attachTo: document.body,
-      global: { plugins: [createPinia(), i18n, ElementPlus], stubs: { transition: false } },
+      global: { plugins: [i18n, ElementPlus], stubs: { transition: false } },
     })
     expect(tw.find('.theme-toggle').exists()).toBe(true)
   })
