@@ -19,7 +19,7 @@ function doLogout() {
   <div class="error-page flex-center">
     <div class="error-content text-center">
       <div class="error-code">403</div>
-      <h2>{{ t('error.403.title') }}</h2>
+      <h2 class="error-title">{{ t('error.403.title') }}</h2>
       <p class="desc">{{ t('error.403.description') }}</p>
       <div class="actions flex-center gap-3">
         <el-button type="primary" @click="goHome">{{ t('error.403.backHome') }}</el-button>
@@ -40,10 +40,16 @@ function doLogout() {
   font-weight: 700;
   color: var(--el-color-primary);
   line-height: 1;
+  letter-spacing: 4px;
+}
+
+.error-title {
+  margin: 12px 0 8px;
+  color: var(--text-primary);
 }
 
 .desc {
-  color: var(--el-text-color-secondary);
+  color: var(--text-secondary);
   margin-bottom: 24px;
 }
 

@@ -7,9 +7,11 @@ import { setupDirectives } from './directives'
 
 // UnoCSS (must be imported before app styles)
 import 'virtual:uno.css'
+// Element Plus dark-mode CSS variables (activated by .dark class on <html>)
+import 'element-plus/theme-chalk/dark/css-vars.css'
 // NProgress base css (colors overridden in src/styles/nprogress.scss)
 import 'nprogress/nprogress.css'
-// Global app styles (reset + variables + transitions + nprogress overrides)
+// Global app styles (tokens + reset + transitions + nprogress overrides)
 import '@/styles/index.scss'
 
 const app = createApp(App)
@@ -20,6 +22,9 @@ app.use(i18n)
 setupDirectives(app)
 
 // Sync persisted locale into i18n before mount so first render uses the saved language.
+// Initialize theme DOM state from store so even before App mounts the <html> attrs
+// are correct (the FOUC inline script in index.html already set them synchronously,
+// this is just a belt-and-braces call in case JS ran after the inline script missed).
 import { useAppStore } from '@/store/modules/app'
 const appStore = useAppStore()
 setI18nLanguage(appStore.locale)

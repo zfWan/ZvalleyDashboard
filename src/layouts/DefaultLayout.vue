@@ -8,6 +8,7 @@ import { useUserStore } from '@/store/modules/user'
 import { useAppStore } from '@/store/modules/app'
 import { setI18nLanguage } from '@/locales'
 import i18n from '@/locales'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const SIDEBAR_WIDTH = '220px'
 const SIDEBAR_COLLAPSED_WIDTH = '64px'
@@ -88,13 +89,18 @@ function handleCommand(cmd: string) {
         <span v-if="!sidebarCollapsed">{{ t('app.title') }}</span>
         <span v-else>ZV</span>
       </div>
+      <!--
+        Sidebar colors come from moss --surface-sidebar / --text-on-sidebar
+        tokens (OQ-2 option a); we bind them here instead of hard-coded
+        #001529/#ccc/#fff so they respond to theme changes (REQ-007.2).
+      -->
       <el-menu
         :default-active="activeMenu"
         :collapse="sidebarCollapsed"
         class="sidebar-menu"
-        background-color="#001529"
-        text-color="#ccc"
-        active-text-color="#fff"
+        :background-color="`var(--surface-sidebar)`"
+        :text-color="`var(--text-on-sidebar-dim)`"
+        :active-text-color="`var(--text-on-primary)`"
         router
         @select="handleSelect"
       >
@@ -118,8 +124,10 @@ function handleCommand(cmd: string) {
           </el-breadcrumb>
         </div>
         <div class="header-right flex items-center gap-4">
+          <!-- REQ-002.1 theme toggle next to language switch -->
+          <ThemeToggle />
           <el-dropdown trigger="click" @command="handleLocaleChange">
-            <span class="cursor-pointer flex items-center gap-1">
+            <span class="interactive flex items-center gap-1">
               {{ locale === 'zh-CN' ? '中文' : 'English' }}
               <el-icon><ArrowDown /></el-icon>
             </span>
@@ -131,7 +139,7 @@ function handleCommand(cmd: string) {
             </template>
           </el-dropdown>
           <el-dropdown trigger="click" @command="handleCommand">
-            <span class="cursor-pointer flex items-center gap-1">
+            <span class="interactive flex items-center gap-1">
               <el-avatar :size="28">{{ username.slice(0, 1).toUpperCase() }}</el-avatar>
               <span>{{ username }}</span>
               <el-icon><ArrowDown /></el-icon>
@@ -161,35 +169,67 @@ function handleCommand(cmd: string) {
 }
 
 .sidebar {
-  background: #001529;
+  background: var(--surface-sidebar);
   transition: width 0.25s ease;
   overflow: hidden;
 }
 
 .logo {
   height: $header-height;
-  color: #fff;
+  color: var(--text-on-primary);
   font-weight: 600;
   font-size: 18px;
   letter-spacing: 1px;
-  background: #002140;
+  background: rgb(0 0 0 / 18%);
+  border-bottom: 1px solid rgb(255 255 255 / 6%);
 }
 
 .sidebar-menu {
   border-right: none;
   height: calc(100vh - #{$header-height});
+
+  // Menu item hover / active: moss darkens/brightens per theme.
+  :deep(.el-menu-item) {
+    color: var(--text-on-sidebar-dim);
+
+    &:hover,
+    &:focus {
+      background-color: var(--surface-sidebar-hover) !important;
+      color: var(--text-on-primary) !important;
+    }
+
+    &.is-active {
+      background-color: var(--surface-sidebar-active) !important;
+      color: var(--text-on-primary) !important;
+    }
+  }
+
+  :deep(.el-menu--collapse) {
+    .el-menu-item {
+      justify-content: center;
+    }
+  }
 }
 
 .header {
   height: $header-height;
-  background: #fff;
+  background: var(--surface-header);
   border-bottom: 1px solid var(--el-border-color-lighter);
   padding: 0 16px;
-  box-shadow: 0 1px 4px rgb(0 21 41 / 4%);
+  box-shadow: var(--shadow-header);
 }
 
 .collapse-btn {
   font-size: 20px;
+  cursor: pointer;
+  color: var(--el-text-color-regular);
+
+  &:hover {
+    color: var(--el-color-primary);
+  }
+}
+
+.interactive {
   cursor: pointer;
   color: var(--el-text-color-regular);
 

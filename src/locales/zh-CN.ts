@@ -6,6 +6,13 @@ export default {
     profile: '个人中心',
     confirmLogout: '确定要退出登录吗？',
     tip: '提示',
+    // theme (REQ-008)
+    themeLight: '浅色模式',
+    themeDark: '深色模式',
+    themeSystem: '跟随系统',
+    themeSwitchToLight: '切换到浅色模式',
+    themeSwitchToDark: '切换到深色模式',
+    themeSwitchToSystem: '切换到跟随系统',
   },
   menu: {
     dashboard: '首页',

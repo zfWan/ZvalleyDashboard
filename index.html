@@ -5,6 +5,50 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>zvalley-dashboard</title>
+    <!--
+      FOUC-prevention inline script (REQ-005):
+      Runs synchronously before any CSS/module scripts that depend on theme,
+      reads persisted theme from localStorage (same key as pinia persist),
+      resolves the effective theme and sets html[data-theme] + html.dark class.
+      Must mirror the logic in src/utils/theme.ts — keep them in sync.
+    -->
+    <script>
+      (function () {
+        try {
+          var KEY = 'zvalley_dashboard_app';
+          var DARK_MQ = '(prefers-color-scheme: dark)';
+          var mode = 'system';
+          try {
+            var raw = localStorage.getItem(KEY);
+            if (raw) {
+              var parsed = JSON.parse(raw);
+              if (parsed && (parsed.theme === 'light' || parsed.theme === 'dark' || parsed.theme === 'system')) {
+                mode = parsed.theme;
+              }
+            }
+          } catch (_) { /* privacy mode / corrupt JSON -> default system */ }
+
+          var effective = 'light';
+          if (mode === 'dark') {
+            effective = 'dark';
+          } else if (mode === 'system') {
+            if (window.matchMedia && window.matchMedia(DARK_MQ).matches) {
+              effective = 'dark';
+            }
+          }
+
+          var html = document.documentElement;
+          html.setAttribute('data-theme', effective);
+          if (effective === 'dark') {
+            html.classList.add('dark');
+          } else {
+            html.classList.remove('dark');
+          }
+        } catch (_) {
+          // no-op: worst case we render default :root (light) tokens.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>

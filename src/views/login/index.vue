@@ -111,17 +111,37 @@ function switchLocale(l: Locale) {
 <style lang="scss" scoped>
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1677ff 0%, #69b1ff 100%);
+
+  // REQ-007.1: moss green gradient replaces the hard-coded #1677ff → #69b1ff.
+  // Dark theme deepens the gradient into moss-ink/moss-stone tones.
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgb(90 138 60 / 30%), transparent 60%),
+    radial-gradient(900px 500px at 100% 100%, rgb(170 219 30 / 18%), transparent 60%),
+    linear-gradient(135deg, var(--moss-primary) 0%, var(--moss-ink) 100%);
+
+  [data-theme='dark'] & {
+    background:
+      radial-gradient(1200px 600px at 10% 0%, rgb(90 138 60 / 22%), transparent 60%),
+      radial-gradient(900px 500px at 100% 100%, rgb(170 219 30 / 10%), transparent 60%),
+      linear-gradient(135deg, #1a2618 0%, #0f160e 100%);
+  }
 }
 
 .login-card {
   width: 400px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-card);
+  border: 1px solid var(--el-border-color-lighter);
+
+  :deep(.el-card__header) {
+    border-bottom: 1px solid var(--el-border-color-lighter);
+  }
 }
 
 .title {
   margin: 0;
   font-size: 20px;
+  color: var(--text-primary);
 }
 
 .locale-btn {

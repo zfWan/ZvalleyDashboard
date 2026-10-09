@@ -91,7 +91,8 @@ function fmt(n: number) {
   .welcome {
     margin: 0 0 16px;
     font-size: 22px;
-    color: var(--el-text-color-primary);
+    font-weight: 600;
+    color: var(--text-primary);
   }
 
   .stat-row {
@@ -100,12 +101,22 @@ function fmt(n: number) {
 
   .stat-card {
     margin-bottom: 16px;
+    border-radius: var(--radius-lg);
+    border-color: var(--el-border-color-lighter);
+    background-color: var(--surface-card);
+  }
+
+  .demo-card {
+    border-radius: var(--radius-lg);
+    border-color: var(--el-border-color-lighter);
+    background-color: var(--surface-card);
   }
 
   .tip {
     margin-top: 16px;
-    color: var(--el-text-color-secondary);
-    font-size: 13px;
+    color: var(--text-secondary);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
   }
 }
 </style>

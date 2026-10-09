@@ -6,6 +6,13 @@ export default {
     profile: 'Profile',
     confirmLogout: 'Are you sure you want to sign out?',
     tip: 'Tip',
+    // theme (REQ-008)
+    themeLight: 'Light Mode',
+    themeDark: 'Dark Mode',
+    themeSystem: 'Sync with System',
+    themeSwitchToLight: 'Switch to light mode',
+    themeSwitchToDark: 'Switch to dark mode',
+    themeSwitchToSystem: 'Switch to system mode',
   },
   menu: {
     dashboard: 'Dashboard',
